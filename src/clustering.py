@@ -7,21 +7,33 @@ from kneed import KneeLocator
 from datetime import datetime
 
 
-def load_data():
-    df = pd.read_csv("data/file.csv")
+def load_data(**kwargs):
+    df = pd.read_csv("/opt/airflow/data/file.csv")
     df = df.dropna()
     print(f"Dataset loaded with shape: {df.shape}")
-    return df
+    
 
+def preprocess_data(**kwargs):
+    df = pd.read_csv("/opt/airflow/data/file.csv")
+    df = df.dropna()
 
-def preprocess_data(df):
+    df = df.select_dtypes(include=['number'])
+
     scaler = StandardScaler()
-    scaled = scaler.fit_transform(df)
-    print("Preprocessing complete.")
-    return scaled
+    scaled_data = scaler.fit_transform(df)
+
+    print("Preprocessing completed successfully.")
 
 
-def train_kmeans(data):
+def train_kmeans(**kwargs):
+    df = pd.read_csv("/opt/airflow/data/file.csv")
+    df = df.dropna()
+
+    df = df.select_dtypes(include=['number'])
+    
+    scaler = StandardScaler()
+    data = scaler.fit_transform(df)
+
     sse = []
     K = range(1, 10)
 
@@ -40,9 +52,9 @@ def train_kmeans(data):
     print(f"Optimal clusters: {optimal_k}")
     print(f"Silhouette score: {score}")
 
-    filename = f"model_{datetime.now().strftime('%Y%m%d_%H%M%S')}.pkl"
+    filename = f"/opt/airflow/data/model_{datetime.now().strftime('%Y%m%d_%H%M%S')}.pkl"
 
     with open(filename, "wb") as f:
         pickle.dump(final_model, f)
 
-    return filename
+    print(f"Model saved successfully at {filename}")

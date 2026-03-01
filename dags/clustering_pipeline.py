@@ -1,3 +1,8 @@
+import sys
+import os
+
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+
 from airflow import DAG
 from airflow.operators.python import PythonOperator
 from datetime import datetime
@@ -18,36 +23,21 @@ dag = DAG(
     catchup=False,
 )
 
-
-def load_task():
-    return load_data()
-
-
-def preprocess_task(ti):
-    df = ti.xcom_pull(task_ids="load_data_task")
-    return preprocess_data(df)
-
-
-def train_task(ti):
-    data = ti.xcom_pull(task_ids="preprocess_task")
-    return train_kmeans(data)
-
-
 load_data_task = PythonOperator(
     task_id="load_data_task",
-    python_callable=load_task,
+    python_callable=load_data,
     dag=dag,
 )
 
 preprocess_task = PythonOperator(
     task_id="preprocess_task",
-    python_callable=preprocess_task,
+    python_callable=preprocess_data,
     dag=dag,
 )
 
 train_model_task = PythonOperator(
     task_id="train_model_task",
-    python_callable=train_task,
+    python_callable=train_kmeans,
     dag=dag,
 )
 
